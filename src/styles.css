@@ -13,18 +13,26 @@ body {
   margin: 10px;
 }
 #canvas-tools {
-  width: 500px;
+  position: relative;
+  width: 510px;
   height: 50px;
   margin: 10px;
-  border: 5px solid black;
+  border: 3px solid rgb(97, 97, 97);
+  display: flex;
 }
 
 #canvas,
-#cursor-canvas {
+#cursor-canvas,
+#background-canvas {
   position: absolute;
   top: 0;
   left: 0;
   border: 5px solid black;
+}
+#cursor-canvas {
+  background-color: transparent;
+}
+#background-canvas {
 }
 
 #canvas:hover {
@@ -43,9 +51,7 @@ body {
   width: 20px;
   border: 2px solid black;
 }
-.color-button {
-  float: right;
-}
+
 .color-button:hover,
 .button:hover {
   cursor: pointer;
@@ -73,6 +79,15 @@ body {
   background-color: pink;
 }
 
+#color-picker {
+  position: absolute;
+  top: -50px;
+  left: 50px;
+  background-color: white;
+  z-index: 98;
+  border: 5px solid blue;
+}
+
 #tooltip {
   position: absolute;
 
@@ -80,10 +95,17 @@ body {
   border-radius: 10px;
   opacity: 0;
   background-color: black;
-
+  z-index: 99;
   color: white;
 }
-
-.visible {
-  opacity: 0.7;
+button {
+  margin: 5px;
+  border: 2px solid rgb(252, 106, 27);
+  text-shadow: none;
+}
+.show {
+  display: flex;
+}
+.hide {
+  display: none;
 }
