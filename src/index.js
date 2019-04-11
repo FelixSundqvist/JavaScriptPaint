@@ -57,7 +57,7 @@ function addColorPalette(domElements, canvasProperties) {
 function eventListeners(domElements, canvasProperties) {
   domElements.canvas.addEventListener("mousedown", ev => {
     startDrawing(ev, domElements, canvasProperties);
-  });
+
 
   domElements.canvas.addEventListener("mouseup", ev => {
     stopDrawing(canvasProperties);
@@ -72,6 +72,7 @@ function eventListeners(domElements, canvasProperties) {
   });
 
   //reset everything
+
   domElements.resetButton.addEventListener("click", ev => {
     reset(domElements, canvasProperties);
   });
@@ -84,6 +85,7 @@ function eventListeners(domElements, canvasProperties) {
   domElements.canvasTools.addEventListener("click", ev => {
     //color palette
     handleToolbar(ev, domElements, canvasProperties);
+
   });
 
   //Make bigger pencil
@@ -92,6 +94,7 @@ function eventListeners(domElements, canvasProperties) {
   });
   handleToolTip(domElements);
 }
+
 
 function handleToolTip(domElements) {
   domElements.canvasTools = Array.from(domElements.canvasTools.children);
@@ -112,28 +115,35 @@ function handleToolTip(domElements) {
       });
       current.addEventListener("mouseout", ev => {
         domElements.tooltip.style.display = "none";
+
       });
     }
   });
 }
 
+
 function handleToolbar(event, domElements, canvasProperties) {
+
   let id = event.srcElement.id;
   //if any color in array call changecolor()
   for (let i = 0; i < canvasProperties.colorsArr.length; i++) {
     if (canvasProperties.colorsArr[i] === id) {
+
       changeColor(
         domElements,
         canvasProperties,
         canvasProperties.colorPalette[id]
       );
+
       break;
     }
   }
   if (id === "eraser") {
+
     eraser(domElements, canvasProperties);
   } else if (id === "background") {
     changeBackground(domElements, canvasProperties);
+
   }
 
   //todo add Zoom
@@ -141,6 +151,7 @@ function handleToolbar(event, domElements, canvasProperties) {
 
 function startDrawing(event, domElements, canvasProperties) {
   hideColorPicker(domElements, canvasProperties);
+
   //DRAW
   if (!canvasProperties.erasing) {
     canvasProperties.ctx.lineWidth = canvasProperties.strokeSize;
@@ -240,7 +251,9 @@ function removePointer(canvasProperties) {
     canvasProperties.height
   );
 }
+
 //change pencil size on scroll
+
 function changeSize(event, canvasProperties) {
   if (event.deltaY > 1 && canvasProperties.strokeSize >= 1) {
     canvasProperties.strokeSize--;
@@ -251,31 +264,37 @@ function changeSize(event, canvasProperties) {
   canvasProperties.cursorCtx.lineWidth = canvasProperties.strokeSize;
 }
 //change color
+
 function changeColor(domElements, canvasProperties, color) {
   canvasProperties.erasing = false;
   canvasProperties.ctx.strokeStyle = color;
   canvasProperties.ctx.fillStyle = color;
+
   canvasProperties.cursorCtx.fillStyle = color;
   canvasProperties.cursorCtx.fill();
   canvasProperties.cursorCtx.stroke();
 
   canvasProperties.currentColor = color;
+
   hideColorPicker(domElements);
   setColorIcon(domElements, canvasProperties);
 }
 function changeBackground(domElements, canvasProperties) {
+
   canvasProperties.ctx.clearRect(
     0,
     0,
     canvasProperties.width,
     canvasProperties.height
   );
+
   domElements.backgroundCanvas.style.backgroundColor =
     canvasProperties.currentColor;
 }
 
 function eraser(domElements, canvasProperties) {
   domElements.eraser.focus();
+
   canvasProperties.cursorCtx.fillStyle = "white";
   canvasProperties.cursorCtx.strokeStyle = "black";
   canvasProperties.cursorCtx.fill();
@@ -285,7 +304,9 @@ function eraser(domElements, canvasProperties) {
   hideColorPicker(domElements);
 }
 
+
 function reset(domElements, canvasProperties) {
+
   canvasProperties.ctx.clearRect(
     0,
     0,
@@ -294,6 +315,7 @@ function reset(domElements, canvasProperties) {
   );
 
   canvasProperties.currentColor = canvasProperties.colorPalette.white;
+
   changeBackground(domElements, canvasProperties);
 }
 function handleColorPalette(domElements, canvasProperties) {
@@ -317,6 +339,7 @@ function hideColorPicker(domElements, canvasProperties) {
 function setColorIcon(domElements, canvasProperties) {
   domElements.showColor.focus();
   domElements.showColor.style.backgroundColor = canvasProperties.currentColor;
+
 }
 window.onload = function() {
   init();

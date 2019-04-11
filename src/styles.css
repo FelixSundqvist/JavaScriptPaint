@@ -85,6 +85,17 @@ body {
 }
 
 #color-picker {
+
+  position: absolute;
+  top: -50px;
+  left: 50px;
+  background-color: white;
+  z-index: 98;
+  border: 5px solid blue;
+}
+
+#tooltip {
+
   position: absolute;
   top: -50px;
   left: 50px;
