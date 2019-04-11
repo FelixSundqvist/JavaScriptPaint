@@ -260,7 +260,7 @@ function changeColor(domElements, canvasProperties, color) {
   canvasProperties.cursorCtx.stroke();
 
   canvasProperties.currentColor = color;
-  hideColorPicker(domElements);
+  hideColorPicker(domElements, canvasProperties);
   setColorIcon(domElements, canvasProperties);
 }
 function changeBackground(domElements, canvasProperties) {
@@ -282,7 +282,7 @@ function eraser(domElements, canvasProperties) {
   canvasProperties.cursorCtx.stroke();
   canvasProperties.currentColor = canvasProperties.colorPalette.white;
   canvasProperties.erasing = true;
-  hideColorPicker(domElements);
+  hideColorPicker(domElements, canvasProperties);
 }
 
 function reset(domElements, canvasProperties) {
