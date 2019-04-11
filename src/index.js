@@ -298,20 +298,20 @@ function reset(domElements, canvasProperties) {
 function handleColorPalette(domElements, canvasProperties) {
   if (canvasProperties.colorClicked === false) {
     showColorPicker(domElements, canvasProperties);
-    canvasProperties.colorClicked = true;
   } else if (canvasProperties.colorClicked === true) {
     hideColorPicker(domElements, canvasProperties);
-    canvasProperties.colorClicked = false;
   }
 }
 
 function showColorPicker(domElements, canvasProperties) {
   domElements.colorPicker.classList.add("show");
   domElements.colorPicker.classList.remove("hide");
+  canvasProperties.colorClicked = true;
 }
 function hideColorPicker(domElements, canvasProperties) {
   domElements.colorPicker.classList.add("hide");
   domElements.colorPicker.classList.remove("show");
+  canvasProperties.colorClicked = false;
 }
 function setColorIcon(domElements, canvasProperties) {
   domElements.showColor.style.backgroundColor = canvasProperties.currentColor;
