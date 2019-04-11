@@ -2,7 +2,7 @@
 Paint application using Javascript
 
 # Functions
-+Draw
-+Erase
-+Add grid
-+Change background
++ Draw
++ Erase
++ Add grid
++ Change background
