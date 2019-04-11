@@ -7,6 +7,7 @@
 
   <body>
     <div class="container">
+      <canvas id="background-canvas"></canvas>
       <canvas id="cursor-canvas"></canvas>
       <canvas id="canvas"></canvas>
     </div>
@@ -14,14 +15,17 @@
     <span id="tooltip"></span>
     <div id="canvas-tools">
       <button id="reset">Reset</button>
-
-      <span class="color-button" id="green"></span>
-      <span class="color-button" id="pink"></span>
-      <span class="color-button" id="purple"></span>
-      <span class="color-button" id="blue"></span>
-      <span class="color-button" id="red"></span>
-      <span class="color-button" id="yellow"></span>
-      <span class="color-button" id="black"></span>
+      <button id="background">Background</button>
+      <div id="color-picker" class="hide">
+        <span class="color-button" id="black"></span>
+        <span class="color-button" id="blue"></span>
+        <span class="color-button" id="red"></span>
+        <span class="color-button" id="green"></span>
+        <span class="color-button" id="yellow"></span>
+        <span class="color-button" id="purple"></span>
+        <span class="color-button" id="pink"></span>
+      </div>
+      <span class="button" id="show-color"></span>
       <span class="button" id="eraser"></span>
     </div>
 

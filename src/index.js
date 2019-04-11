@@ -4,8 +4,11 @@ let init = (() => {
   const DOMELEMENTS = {
     canvas: document.getElementById("canvas"),
     cursorCanvas: document.getElementById("cursor-canvas"),
+    backgroundCanvas: document.getElementById("background-canvas"),
     resetButton: document.getElementById("reset"),
     canvasTools: document.getElementById("canvas-tools"),
+    showColor: document.getElementById("show-color"),
+    colorPicker: document.getElementById("color-picker"),
     colors: document.getElementsByClassName("color-button"),
     eraser: document.getElementById("eraser"),
     tooltip: document.getElementById("tooltip")
@@ -20,6 +23,8 @@ let init = (() => {
     ctx: DOMELEMENTS.canvas.getContext("2d"),
     cursorCtx: DOMELEMENTS.cursorCanvas.getContext("2d"),
     erasing: false,
+    colorClicked: false,
+    currentColor: "black",
     colorPalette: {
       purple: "purple",
       green: "rgb(9, 224, 9)",
@@ -33,13 +38,13 @@ let init = (() => {
     colorsArr: []
   };
 
-  DOMELEMENTS.canvas.height = DOMELEMENTS.cursorCanvas.height =
+  DOMELEMENTS.canvas.height = DOMELEMENTS.cursorCanvas.height = DOMELEMENTS.backgroundCanvas.height =
     CANVASPROPERTIES.height;
-  DOMELEMENTS.canvas.width = DOMELEMENTS.cursorCanvas.width =
+  DOMELEMENTS.canvas.width = DOMELEMENTS.cursorCanvas.width = DOMELEMENTS.backgroundCanvas.width =
     CANVASPROPERTIES.width;
 
-  console.log(DOMELEMENTS.tooltip);
   addColorPalette(DOMELEMENTS, CANVASPROPERTIES);
+  setColorIcon(DOMELEMENTS, CANVASPROPERTIES);
   eventListeners(DOMELEMENTS, CANVASPROPERTIES);
 })();
 
@@ -49,77 +54,93 @@ function addColorPalette(domElements, canvasProperties) {
   }
 }
 
-function eventListeners(domObj, canvasProperties) {
-  domObj.canvas.addEventListener("mousedown", ev => {
-    startDrawing(ev, canvasProperties);
+function eventListeners(domElements, canvasProperties) {
+  domElements.canvas.addEventListener("mousedown", ev => {
+    startDrawing(ev, domElements, canvasProperties);
   });
 
-  domObj.canvas.addEventListener("mouseup", ev => {
+  domElements.canvas.addEventListener("mouseup", ev => {
     stopDrawing(canvasProperties);
   });
 
-  domObj.canvas.addEventListener("mousemove", ev => {
+  domElements.canvas.addEventListener("mousemove", ev => {
     moveFunction(ev, canvasProperties);
   });
-  domObj.canvas.addEventListener("mouseout", ev => {
+  domElements.canvas.addEventListener("mouseout", ev => {
     removePointer(canvasProperties);
+    stopDrawing(canvasProperties);
   });
 
   //reset everything
-  domObj.resetButton.addEventListener("click", ev => {
-    reset(canvasProperties);
+  domElements.resetButton.addEventListener("click", ev => {
+    reset(domElements, canvasProperties);
   });
-  domObj.canvasTools.addEventListener("click", ev => {
+  //show color palette
+
+  domElements.showColor.addEventListener("click", ev => {
+    handleColorPalette(domElements, canvasProperties);
+  });
+
+  domElements.canvasTools.addEventListener("click", ev => {
     //color palette
-    handleTools(ev, canvasProperties);
+    handleToolbar(ev, domElements, canvasProperties);
   });
 
   //Make bigger pencil
   document.addEventListener("wheel", ev => {
     changeSize(ev, canvasProperties);
   });
-  handleToolTip(domObj);
+  handleToolTip(domElements);
 }
-function handleToolTip(domObj) {
-  domObj.canvasTools = Array.from(domObj.canvasTools.children);
-  domObj.canvasTools.map(current => {
-    current.addEventListener("mouseover", ev => {
-      let rect = current.getBoundingClientRect();
 
-      let topOffset = -50;
-      let rightOffset = -20;
+function handleToolTip(domElements) {
+  domElements.canvasTools = Array.from(domElements.canvasTools.children);
 
-      domObj.tooltip.style.opacity = "0.8";
+  domElements.canvasTools.map(current => {
+    //don´t show tooltip if color picker
+    if (current.id !== "color-picker") {
+      current.addEventListener("mouseover", ev => {
+        let topOffset = -50;
+        let rightOffset = -20;
 
-      domObj.tooltip.innerText = current.id;
+        domElements.tooltip.style.opacity = "0.8";
 
-      domObj.tooltip.style.top = ev.clientY + topOffset + "px";
-      domObj.tooltip.style.left = ev.clientX + rightOffset + "px";
-    });
-    current.addEventListener("mouseout", ev => {
-      domObj.tooltip.style.opacity = "0";
-    });
+        domElements.tooltip.innerText = current.id;
+        //tooltip to mouse position
+        domElements.tooltip.style.top = ev.clientY + topOffset + "px";
+        domElements.tooltip.style.left = ev.clientX + rightOffset + "px";
+      });
+      current.addEventListener("mouseout", ev => {
+        domElements.tooltip.style.opacity = "0";
+      });
+    }
   });
 }
 
-function handleTools(event, canvasProperties) {
+function handleToolbar(event, domElements, canvasProperties) {
   let id = event.srcElement.id;
 
   for (let i = 0; i < canvasProperties.colorsArr.length; i++) {
     if (canvasProperties.colorsArr[i] === id) {
-      changeColor(canvasProperties, canvasProperties.colorPalette[id]);
+      changeColor(
+        domElements,
+        canvasProperties,
+        canvasProperties.colorPalette[id]
+      );
       break;
     }
   }
-
   if (id === "eraser") {
     eraser(canvasProperties);
+  } else if (id === "background") {
+    changeBackground(domElements, canvasProperties);
   }
 
   //todo add Zoom
 }
 
-function startDrawing(event, canvasProperties) {
+function startDrawing(event, domElements, canvasProperties) {
+  hideColorPicker(domElements, canvasProperties);
   //DRAW
   if (!canvasProperties.erasing) {
     canvasProperties.ctx.lineWidth = canvasProperties.strokeSize;
@@ -165,7 +186,6 @@ function startDrawing(event, canvasProperties) {
 
 function stopDrawing(canvasProperties) {
   canvasProperties.mouseDown = false;
-
   canvasProperties.ctx.moveTo(0, 0);
 }
 
@@ -192,6 +212,7 @@ function moveFunction(event, canvasProperties) {
   movePointer(event, canvasProperties);
 }
 
+//move custom pointer
 function movePointer(event, canvasProperties) {
   canvasProperties.cursorCtx.clearRect(
     0,
@@ -219,6 +240,7 @@ function removePointer(canvasProperties) {
     canvasProperties.height
   );
 }
+//pencil size
 function changeSize(event, canvasProperties) {
   if (event.deltaY > 1 && canvasProperties.strokeSize >= 1) {
     canvasProperties.strokeSize--;
@@ -229,31 +251,70 @@ function changeSize(event, canvasProperties) {
   canvasProperties.cursorCtx.lineWidth = canvasProperties.strokeSize;
 }
 //change color
-function changeColor(canvasProperties, color) {
+function changeColor(domElements, canvasProperties, color) {
   canvasProperties.erasing = false;
   canvasProperties.ctx.strokeStyle = color;
   canvasProperties.ctx.fillStyle = color;
-  canvasProperties.cursorCtx.strokeStyle = color;
+  // canvasProperties.cursorCtx.strokeStyle = color;
   canvasProperties.cursorCtx.fillStyle = color;
   canvasProperties.cursorCtx.fill();
   canvasProperties.cursorCtx.stroke();
-}
-function eraser(canvasProperties) {
-  canvasProperties.cursorCtx.fillStyle = "white";
-  canvasProperties.cursorCtx.strokeStyle = "black";
-  canvasProperties.cursorCtx.fill();
-  canvasProperties.cursorCtx.stroke();
 
-  canvasProperties.erasing = true;
+  canvasProperties.currentColor = color;
+  hideColorPicker(domElements);
+  setColorIcon(domElements, canvasProperties);
 }
-
-function reset(canvasProperties) {
+function changeBackground(domElements, canvasProperties) {
   canvasProperties.ctx.clearRect(
     0,
     0,
     canvasProperties.width,
     canvasProperties.height
   );
+  domElements.backgroundCanvas.style.backgroundColor =
+    canvasProperties.currentColor;
+}
+
+function eraser(canvasProperties) {
+  canvasProperties.cursorCtx.fillStyle = "white";
+  canvasProperties.cursorCtx.strokeStyle = "black";
+  canvasProperties.cursorCtx.fill();
+  canvasProperties.cursorCtx.stroke();
+  canvasProperties.currentColor = canvasProperties.colorPalette.white;
+  canvasProperties.erasing = true;
+}
+
+function reset(domElements, canvasProperties) {
+  canvasProperties.ctx.clearRect(
+    0,
+    0,
+    canvasProperties.width,
+    canvasProperties.height
+  );
+
+  canvasProperties.currentColor = canvasProperties.colorPalette.white;
+  changeBackground(domElements, canvasProperties);
+}
+function handleColorPalette(domElements, canvasProperties) {
+  if (canvasProperties.colorClicked === false) {
+    showColorPicker(domElements, canvasProperties);
+    canvasProperties.colorClicked = true;
+  } else if (canvasProperties.colorClicked === true) {
+    hideColorPicker(domElements, canvasProperties);
+    canvasProperties.colorClicked = false;
+  }
+}
+
+function showColorPicker(domElements, canvasProperties) {
+  domElements.colorPicker.classList.add("show");
+  domElements.colorPicker.classList.remove("hide");
+}
+function hideColorPicker(domElements, canvasProperties) {
+  domElements.colorPicker.classList.add("hide");
+  domElements.colorPicker.classList.remove("show");
+}
+function setColorIcon(domElements, canvasProperties) {
+  domElements.showColor.style.backgroundColor = canvasProperties.currentColor;
 }
 window.onload = function() {
   init();
