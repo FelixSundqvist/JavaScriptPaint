@@ -103,7 +103,7 @@ function handleToolTip(domElements) {
         let topOffset = -50;
         let rightOffset = -20;
 
-        domElements.tooltip.style.opacity = "0.8";
+        domElements.tooltip.style.display = "block";
 
         domElements.tooltip.innerText = current.id;
         //tooltip to mouse position
@@ -111,7 +111,7 @@ function handleToolTip(domElements) {
         domElements.tooltip.style.left = ev.clientX + rightOffset + "px";
       });
       current.addEventListener("mouseout", ev => {
-        domElements.tooltip.style.opacity = "0";
+        domElements.tooltip.style.display = "none";
       });
     }
   });
@@ -119,7 +119,7 @@ function handleToolTip(domElements) {
 
 function handleToolbar(event, domElements, canvasProperties) {
   let id = event.srcElement.id;
-
+  //if any color in array call changecolor()
   for (let i = 0; i < canvasProperties.colorsArr.length; i++) {
     if (canvasProperties.colorsArr[i] === id) {
       changeColor(
