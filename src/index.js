@@ -395,6 +395,7 @@ let controller = (view => {
       addColorPalette(DOMELEMENTS, CANVASPROPERTIES);
       eventListeners(DOMELEMENTS, CANVASPROPERTIES);
     }
+
   };
 })(view);
 controller.init();
