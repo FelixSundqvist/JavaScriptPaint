@@ -6,11 +6,16 @@ body {
   margin: 0;
   padding: 0;
 }
-.container {
+.canvas-container {
   position: relative;
   width: 500px;
   height: 500px;
   margin: 10px;
+}
+.main-container {
+  height: 700px;
+  width: 700px;
+  border: 1px solid black;
 }
 #canvas-tools {
   position: relative;
@@ -20,10 +25,19 @@ body {
   border: 3px solid rgb(97, 97, 97);
   display: flex;
 }
+#canvas-tools-right {
+  position: relative;
+  width: 510px;
+  height: 100px;
+  margin: 10px;
+  border: 3px solid rgb(97, 97, 97);
+  display: flex;
+}
 
-#canvas,
+#main-canvas,
 #cursor-canvas,
-#background-canvas {
+#background-canvas,
+#grid-canvas {
   position: absolute;
   top: 0;
   left: 0;
@@ -31,11 +45,15 @@ body {
 }
 #cursor-canvas {
   background-color: transparent;
+  pointer-events: none;
 }
 #background-canvas {
 }
+#grid-canvas {
+  pointer-events: none;
+}
 
-#canvas:hover {
+#main-canvas:hover {
   cursor: none;
 }
 .lower-opacity {
@@ -114,8 +132,27 @@ body {
   z-index: 99;
   color: white;
 }
+input[type="number"] {
+  width: 50px;
+  height: 18px;
+  margin: 2px;
+}
+
+label {
+  margin: 2px 5px;
+  display: inline-block;
+  width: 70px;
+}
+
+#grid-form {
+  font-size: 0.8rem;
+  width: 250px;
+  height: 100px;
+}
 button {
-  margin: 5px;
+  margin: 8px;
+  padding: 8px;
+  height: 60%;
   border: 2px solid rgb(252, 106, 27);
   text-shadow: none;
 }

@@ -6,28 +6,44 @@
   </head>
 
   <body>
-    <div class="container">
-      <canvas id="background-canvas"></canvas>
-      <canvas id="cursor-canvas"></canvas>
-      <canvas id="canvas"></canvas>
-    </div>
-
-    <span id="tooltip"></span>
-    <div id="canvas-tools">
-      <button id="reset">Reset</button>
-      <button id="background">Background</button>
-      <div id="color-picker" class="hide">
-        <span class="color-button" id="black"></span>
-        <span class="color-button" id="blue"></span>
-        <span class="color-button" id="red"></span>
-        <span class="color-button" id="green"></span>
-        <span class="color-button" id="yellow"></span>
-        <span class="color-button" id="purple"></span>
-        <span class="color-button" id="pink"></span>
+    <div class="main-container">
+      <div class="canvas-container">
+        <canvas id="background-canvas"></canvas>
+        <canvas id="main-canvas"></canvas>
+        <canvas id="grid-canvas"></canvas>
+        <canvas id="cursor-canvas"></canvas>
       </div>
 
-      <span class="button" id="show-color" tabindex="-1"></span>
-      <span class="button" id="eraser" tabindex="-1"></span>
+      <span id="tooltip"></span>
+
+      <div id="canvas-tools">
+        <button id="reset">Reset</button>
+        <button id="background">Background</button>
+
+        <div id="color-picker" class="hide">
+          <span class="color-button" id="black"></span>
+          <span class="color-button" id="blue"></span>
+          <span class="color-button" id="red"></span>
+          <span class="color-button" id="green"></span>
+          <span class="color-button" id="yellow"></span>
+          <span class="color-button" id="purple"></span>
+          <span class="color-button" id="pink"></span>
+        </div>
+        <span class="button" id="show-color" tabindex="-1"></span>
+        <span class="button" id="eraser" tabindex="-1"></span>
+
+        <form id="grid-form">
+          <label for="grid-rows">Grid Rows:</label>
+          <input type="number" id="grid-rows" name="grid-rows" value="5" />
+          <br />
+          <label for="grid-cols">Grid Cols:</label>
+          <input type="number" id="grid-cols" name="grid-cols" value="5" />
+          <br />
+        </form>
+
+        <button id="grid">Grid</button>
+      </div>
+      <!--<div id="canvas-tools-right"></div>-->
 
     </div>
 
