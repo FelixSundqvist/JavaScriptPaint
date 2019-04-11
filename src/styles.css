@@ -57,6 +57,11 @@ body {
   cursor: pointer;
 }
 
+#show-color:focus,
+#eraser:focus {
+  border: 3px dotted red;
+}
+
 #blue {
   background-color: rgb(50, 67, 255);
 }

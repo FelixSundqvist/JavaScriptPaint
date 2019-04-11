@@ -131,7 +131,7 @@ function handleToolbar(event, domElements, canvasProperties) {
     }
   }
   if (id === "eraser") {
-    eraser(canvasProperties);
+    eraser(domElements, canvasProperties);
   } else if (id === "background") {
     changeBackground(domElements, canvasProperties);
   }
@@ -188,7 +188,7 @@ function stopDrawing(canvasProperties) {
   canvasProperties.mouseDown = false;
   canvasProperties.ctx.moveTo(0, 0);
 }
-
+//draw when cursor is moving
 function moveFunction(event, canvasProperties) {
   canvasProperties.moving = true;
 
@@ -240,7 +240,7 @@ function removePointer(canvasProperties) {
     canvasProperties.height
   );
 }
-//pencil size
+//change pencil size on scroll
 function changeSize(event, canvasProperties) {
   if (event.deltaY > 1 && canvasProperties.strokeSize >= 1) {
     canvasProperties.strokeSize--;
@@ -255,7 +255,6 @@ function changeColor(domElements, canvasProperties, color) {
   canvasProperties.erasing = false;
   canvasProperties.ctx.strokeStyle = color;
   canvasProperties.ctx.fillStyle = color;
-  // canvasProperties.cursorCtx.strokeStyle = color;
   canvasProperties.cursorCtx.fillStyle = color;
   canvasProperties.cursorCtx.fill();
   canvasProperties.cursorCtx.stroke();
@@ -275,13 +274,15 @@ function changeBackground(domElements, canvasProperties) {
     canvasProperties.currentColor;
 }
 
-function eraser(canvasProperties) {
+function eraser(domElements, canvasProperties) {
+  domElements.eraser.focus();
   canvasProperties.cursorCtx.fillStyle = "white";
   canvasProperties.cursorCtx.strokeStyle = "black";
   canvasProperties.cursorCtx.fill();
   canvasProperties.cursorCtx.stroke();
   canvasProperties.currentColor = canvasProperties.colorPalette.white;
   canvasProperties.erasing = true;
+  hideColorPicker(domElements);
 }
 
 function reset(domElements, canvasProperties) {
@@ -314,6 +315,7 @@ function hideColorPicker(domElements, canvasProperties) {
   canvasProperties.colorClicked = false;
 }
 function setColorIcon(domElements, canvasProperties) {
+  domElements.showColor.focus();
   domElements.showColor.style.backgroundColor = canvasProperties.currentColor;
 }
 window.onload = function() {
