@@ -9,9 +9,9 @@
     <div class="main-container">
       <div class="canvas-container">
         <canvas id="background-canvas"></canvas>
+        <canvas id="main-canvas"></canvas>
         <canvas id="grid-canvas"></canvas>
         <canvas id="cursor-canvas"></canvas>
-        <canvas id="main-canvas"></canvas>
       </div>
 
       <span id="tooltip"></span>
@@ -19,9 +19,7 @@
       <div id="canvas-tools">
         <button id="reset">Reset</button>
         <button id="background">Background</button>
-        <input type="number" id="grid-rows" value="5" />
-        <input type="number" id="grid-cols" value="5" />
-        <button id="grid">Grid</button>
+
         <div id="color-picker" class="hide">
           <span class="color-button" id="black"></span>
           <span class="color-button" id="blue"></span>
@@ -33,7 +31,19 @@
         </div>
         <span class="button" id="show-color" tabindex="-1"></span>
         <span class="button" id="eraser" tabindex="-1"></span>
+
+        <form id="grid-form">
+          <label for="grid-rows">Grid Rows:</label>
+          <input type="number" id="grid-rows" name="grid-rows" value="5" />
+          <br />
+          <label for="grid-cols">Grid Cols:</label>
+          <input type="number" id="grid-cols" name="grid-cols" value="5" />
+          <br />
+        </form>
+
+        <button id="grid">Grid</button>
       </div>
+
       <!--<div id="canvas-tools-right"></div>-->
     </div>
 

@@ -149,9 +149,9 @@ let view = (() => {
 
   let reset = (domElements, cProperties) => {
     cProperties.ctx.clearRect(0, 0, cProperties.width, cProperties.height);
-
     cProperties.currentColor = cProperties.colorPalette.white;
     changeBackground(domElements, cProperties);
+    clearGrid(cProperties);
   };
 
   let handleToolbar = (event, domElements, cProperties) => {

@@ -45,8 +45,12 @@ body {
 }
 #cursor-canvas {
   background-color: transparent;
+  pointer-events: none;
 }
 #background-canvas {
+}
+#grid-canvas {
+  pointer-events: none;
 }
 
 #main-canvas:hover {
@@ -118,11 +122,26 @@ body {
   color: white;
 }
 input[type="number"] {
-  width: 100px;
-  height: 20px;
+  width: 50px;
+  height: 18px;
+  margin: 2px;
+}
+
+label {
+  margin: 2px 5px;
+  display: inline-block;
+  width: 70px;
+}
+
+#grid-form {
+  font-size: 0.8rem;
+  width: 250px;
+  height: 100px;
 }
 button {
-  margin: 5px;
+  margin: 8px;
+  padding: 8px;
+  height: 60%;
   border: 2px solid rgb(252, 106, 27);
   text-shadow: none;
 }
