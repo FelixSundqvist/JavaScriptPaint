@@ -1,17 +1,288 @@
 import "./styles.css";
 
-let init = (() => {
+let view = (() => {
+  let startDrawing = (event, domElements, cProperties) => {
+    //DRAW
+    if (!cProperties.erasing) {
+      cProperties.ctx.lineWidth = cProperties.strokeSize;
+      cProperties.cursorCtx.lineWidth = cProperties.strokeSize;
+
+      if (cProperties.mouseDown === false && cProperties.moving === true) {
+        cProperties.ctx.beginPath();
+        cProperties.ctx.moveTo(event.x, event.y);
+
+        cProperties.mouseDown = true;
+      }
+
+      cProperties.ctx.beginPath();
+      cProperties.ctx.arc(
+        event.x,
+        event.y,
+        cProperties.strokeSize / 4,
+        0,
+        2 * Math.PI
+      );
+      cProperties.ctx.fill();
+      cProperties.ctx.stroke();
+      cProperties.moving = false;
+    } //ERASE
+    else if (cProperties.erasing) {
+      if (cProperties.mouseDown === false && cProperties.moving === true) {
+        cProperties.mouseDown = true;
+      }
+      cProperties.ctx.clearRect(
+        event.x,
+        event.y,
+        cProperties.strokeSize * 2,
+        cProperties.strokeSize * 2
+      );
+    }
+    //hide color palette if visible
+    hideColorPicker(domElements, cProperties);
+  };
+
+  let stopDrawing = cProperties => {
+    cProperties.mouseDown = false;
+    cProperties.ctx.moveTo(0, 0);
+  };
+  //draw when cursor is moving
+  let moveFunction = (event, cProperties) => {
+    cProperties.moving = true;
+
+    if (!cProperties.erasing) {
+      if (cProperties.mouseDown === true) {
+        cProperties.ctx.lineTo(event.x, event.y);
+        cProperties.ctx.stroke();
+      }
+    } else if (cProperties.erasing === true && cProperties.mouseDown === true) {
+      cProperties.ctx.clearRect(
+        event.x,
+        event.y,
+        cProperties.strokeSize * 2,
+        cProperties.strokeSize * 2
+      );
+    }
+
+    movePointer(event, cProperties);
+  };
+  //move custom pointer
+  let movePointer = (event, cProperties) => {
+    cProperties.cursorCtx.clearRect(
+      0,
+      0,
+      cProperties.width,
+      cProperties.height
+    );
+
+    cProperties.cursorCtx.beginPath();
+    cProperties.cursorCtx.arc(
+      event.x,
+      event.y,
+      cProperties.strokeSize,
+      0,
+      2 * Math.PI
+    );
+    cProperties.cursorCtx.stroke();
+    cProperties.cursorCtx.fill();
+  };
+
+  let removePointer = cProperties => {
+    cProperties.cursorCtx.clearRect(
+      0,
+      0,
+      cProperties.width,
+      cProperties.height
+    );
+  };
+
+  //change pencil size on scroll
+  let changeSize = (event, cProperties) => {
+    if (event.deltaY > 1 && cProperties.strokeSize >= 1) {
+      cProperties.strokeSize--;
+    } else if (event.deltaY <= 0 && cProperties.strokeSize < 10) {
+      cProperties.strokeSize++;
+    }
+    cProperties.ctx.lineWidth = cProperties.strokeSize;
+    cProperties.cursorCtx.lineWidth = cProperties.strokeSize;
+  };
+  let changeColor = (domElements, cProperties, color) => {
+    cProperties.erasing = false;
+    cProperties.ctx.strokeStyle = color;
+    cProperties.ctx.fillStyle = color;
+    cProperties.cursorCtx.fillStyle = color;
+    cProperties.cursorCtx.fill();
+    cProperties.cursorCtx.stroke();
+
+    cProperties.currentColor = color;
+    hideColorPicker(domElements, cProperties);
+    setColorIcon(domElements, cProperties);
+  };
+  let changeBackground = (domElements, cProperties) => {
+    cProperties.ctx.clearRect(0, 0, cProperties.width, cProperties.height);
+    domElements.canvas.background.style.backgroundColor =
+      cProperties.currentColor;
+  };
+  let eraser = (domElements, cProperties) => {
+    domElements.eraser.focus();
+    cProperties.cursorCtx.fillStyle = "white";
+    cProperties.cursorCtx.strokeStyle = "black";
+    cProperties.cursorCtx.fill();
+    cProperties.cursorCtx.stroke();
+    cProperties.currentColor = cProperties.colorPalette.white;
+    cProperties.erasing = true;
+    hideColorPicker(domElements);
+  };
+  let showColorPicker = (domElements, cProperties) => {
+    domElements.colorPicker.classList.add("show");
+    domElements.colorPicker.classList.remove("hide");
+    cProperties.colorClicked = true;
+  };
+  let hideColorPicker = (domElements, cProperties) => {
+    domElements.colorPicker.classList.add("hide");
+    domElements.colorPicker.classList.remove("show");
+    cProperties.colorClicked = false;
+  };
+  let setColorIcon = (domElements, cProperties) => {
+    domElements.showColor.focus();
+    domElements.showColor.style.backgroundColor = cProperties.currentColor;
+  };
+
+  let reset = (domElements, cProperties) => {
+    cProperties.ctx.clearRect(0, 0, cProperties.width, cProperties.height);
+
+    cProperties.currentColor = cProperties.colorPalette.white;
+    changeBackground(domElements, cProperties);
+  };
+
+  let handleToolbar = (event, domElements, cProperties) => {
+    let id = event.srcElement.id;
+    //if any color in array call changecolor()
+    for (let i = 0; i < cProperties.colorsArr.length; i++) {
+      if (cProperties.colorsArr[i] === id) {
+        changeColor(domElements, cProperties, cProperties.colorPalette[id]);
+        break;
+      }
+    }
+    if (id === "eraser") {
+      eraser(domElements, cProperties);
+    } else if (id === "background") {
+      changeBackground(domElements, cProperties);
+    }
+
+    //todo add Zoom
+  };
+  let handleToolTip = domElements => {
+    domElements.canvasTools = Array.from(domElements.canvasTools.children);
+
+    domElements.canvasTools.map(current => {
+      //don´t show tooltip if color picker
+      if (current.id !== "color-picker") {
+        current.addEventListener("mouseover", ev => {
+          let topOffset = -50;
+          let rightOffset = -20;
+
+          domElements.tooltip.style.display = "block";
+
+          domElements.tooltip.innerText = current.id;
+          //tooltip to mouse position
+          domElements.tooltip.style.top = ev.clientY + topOffset + "px";
+          domElements.tooltip.style.left = ev.clientX + rightOffset + "px";
+        });
+        current.addEventListener("mouseout", ev => {
+          domElements.tooltip.style.display = "none";
+        });
+      }
+    });
+  };
+
+  let setCanvasSize = (canvasArr, cProperties) => {
+    canvasArr.map(cur => {
+      let currentCanvas = document.getElementById(cur + "-canvas");
+      currentCanvas.height = cProperties.height;
+      currentCanvas.width = cProperties.width;
+    });
+  };
+
+  let createGrid = (domElements, cProperties) => {
+    let columns = domElements.gridColInput.value;
+    let rows = domElements.gridRowInput.value;
+
+    let colAmount = cProperties.width / columns;
+    let rowAmount = cProperties.height / rows;
+
+    //clear canvas
+    cProperties.gridCtx.clearRect(0, 0, cProperties.width, cProperties.height);
+
+    cProperties.gridCtx.beginPath();
+
+    cProperties.gridCtx.moveTo(0, 0);
+
+    cProperties.gridCtx.lineTo(0, 200);
+    cProperties.gridCtx.stroke();
+
+    cProperties.gridClicked = true;
+
+    for (let i = 0; i <= cProperties.width; i += colAmount) {
+      cProperties.gridCtx.beginPath();
+      cProperties.gridCtx.moveTo(0, i);
+      cProperties.gridCtx.lineTo(cProperties.width, i);
+      cProperties.gridCtx.stroke();
+
+      for (let i = 0; i <= cProperties.height; i += rowAmount) {
+        cProperties.gridCtx.beginPath();
+        cProperties.gridCtx.moveTo(i, 0);
+        cProperties.gridCtx.lineTo(i, cProperties.height);
+        cProperties.gridCtx.stroke();
+      }
+    }
+  };
+
+  let clearGrid = cProperties => {
+    cProperties.gridClicked = false;
+    cProperties.gridCtx.clearRect(0, 0, cProperties.width, cProperties.height);
+  };
+
+  return {
+    startDrawing,
+    stopDrawing,
+    moveFunction,
+    movePointer,
+    removePointer,
+    changeSize,
+    changeColor,
+    changeBackground,
+    eraser,
+    showColorPicker,
+    hideColorPicker,
+    setColorIcon,
+    reset,
+    handleToolbar,
+    handleToolTip,
+    setCanvasSize,
+    createGrid,
+    clearGrid
+  };
+})();
+
+let controller = (view => {
   const DOMELEMENTS = {
-    canvas: document.getElementById("canvas"),
-    cursorCanvas: document.getElementById("cursor-canvas"),
-    backgroundCanvas: document.getElementById("background-canvas"),
+    canvas: {
+      main: document.getElementById("main-canvas"),
+      cursor: document.getElementById("cursor-canvas"),
+      background: document.getElementById("background-canvas"),
+      grid: document.getElementById("grid-canvas")
+    },
+    canvasArr: ["main", "cursor", "background", "grid"],
     resetButton: document.getElementById("reset"),
+    gridButton: document.getElementById("grid"),
     canvasTools: document.getElementById("canvas-tools"),
     showColor: document.getElementById("show-color"),
     colorPicker: document.getElementById("color-picker"),
     colors: document.getElementsByClassName("color-button"),
     eraser: document.getElementById("eraser"),
-    tooltip: document.getElementById("tooltip")
+    tooltip: document.getElementById("tooltip"),
+    gridRowInput: document.getElementById("grid-rows"),
+    gridColInput: document.getElementById("grid-cols")
   };
 
   const CANVASPROPERTIES = {
@@ -20,10 +291,12 @@ let init = (() => {
     height: 500,
     width: 500,
     moving: false,
-    ctx: DOMELEMENTS.canvas.getContext("2d"),
-    cursorCtx: DOMELEMENTS.cursorCanvas.getContext("2d"),
+    ctx: DOMELEMENTS.canvas.main.getContext("2d"),
+    cursorCtx: DOMELEMENTS.canvas.cursor.getContext("2d"),
+    gridCtx: DOMELEMENTS.canvas.grid.getContext("2d"),
     erasing: false,
     colorClicked: false,
+    gridClicked: false,
     currentColor: "black",
     colorPalette: {
       purple: "purple",
@@ -35,287 +308,93 @@ let init = (() => {
       black: "#000000",
       white: "#ffffff"
     },
-    colorsArr: []
+    colorsArr: [],
+    gridCols: 5,
+    gridRows: 5
   };
 
-  DOMELEMENTS.canvas.height = DOMELEMENTS.cursorCanvas.height = DOMELEMENTS.backgroundCanvas.height =
-    CANVASPROPERTIES.height;
-  DOMELEMENTS.canvas.width = DOMELEMENTS.cursorCanvas.width = DOMELEMENTS.backgroundCanvas.width =
-    CANVASPROPERTIES.width;
-
-  addColorPalette(DOMELEMENTS, CANVASPROPERTIES);
-  setColorIcon(DOMELEMENTS, CANVASPROPERTIES);
-  eventListeners(DOMELEMENTS, CANVASPROPERTIES);
-})();
-
-function addColorPalette(domElements, canvasProperties) {
-  for (let i = 0; i < domElements.colors.length; i++) {
-    canvasProperties.colorsArr.push(domElements.colors[i].id);
-  }
-}
-
-function eventListeners(domElements, canvasProperties) {
-  domElements.canvas.addEventListener("mousedown", ev => {
-    startDrawing(ev, domElements, canvasProperties);
-  });
-
-  domElements.canvas.addEventListener("mouseup", ev => {
-    stopDrawing(canvasProperties);
-  });
-
-  domElements.canvas.addEventListener("mousemove", ev => {
-    moveFunction(ev, canvasProperties);
-  });
-  domElements.canvas.addEventListener("mouseout", ev => {
-    removePointer(canvasProperties);
-    stopDrawing(canvasProperties);
-  });
-
-  //reset everything
-  domElements.resetButton.addEventListener("click", ev => {
-    reset(domElements, canvasProperties);
-  });
-  //show color palette
-
-  domElements.showColor.addEventListener("click", ev => {
-    handleColorPalette(domElements, canvasProperties);
-  });
-
-  domElements.canvasTools.addEventListener("click", ev => {
-    //color palette
-    handleToolbar(ev, domElements, canvasProperties);
-  });
-
-  //Make bigger pencil
-  document.addEventListener("wheel", ev => {
-    changeSize(ev, canvasProperties);
-  });
-  handleToolTip(domElements);
-}
-
-function handleToolTip(domElements) {
-  domElements.canvasTools = Array.from(domElements.canvasTools.children);
-
-  domElements.canvasTools.map(current => {
-    //don´t show tooltip if color picker
-    if (current.id !== "color-picker") {
-      current.addEventListener("mouseover", ev => {
-        let topOffset = -50;
-        let rightOffset = -20;
-
-        domElements.tooltip.style.display = "block";
-
-        domElements.tooltip.innerText = current.id;
-        //tooltip to mouse position
-        domElements.tooltip.style.top = ev.clientY + topOffset + "px";
-        domElements.tooltip.style.left = ev.clientX + rightOffset + "px";
-      });
-      current.addEventListener("mouseout", ev => {
-        domElements.tooltip.style.display = "none";
-      });
-    }
-  });
-}
-
-function handleToolbar(event, domElements, canvasProperties) {
-  let id = event.srcElement.id;
-  //if any color in array call changecolor()
-  for (let i = 0; i < canvasProperties.colorsArr.length; i++) {
-    if (canvasProperties.colorsArr[i] === id) {
-      changeColor(
-        domElements,
-        canvasProperties,
-        canvasProperties.colorPalette[id]
+  let eventListeners = (domElements, cProperties) => {
+    domElements.canvas.main.addEventListener("mousedown", ev => {
+      view.startDrawing(ev, domElements, cProperties);
+    });
+    domElements.canvas.main.addEventListener("mouseup", ev => {
+      view.stopDrawing(cProperties);
+    });
+    domElements.canvas.main.addEventListener("mousemove", ev => {
+      view.moveFunction(ev, cProperties);
+    });
+    domElements.canvas.main.addEventListener("mouseout", ev => {
+      view.removePointer(cProperties);
+      view.stopDrawing(cProperties);
+    });
+    //reset everything
+    domElements.resetButton.addEventListener("click", ev => {
+      view.reset(domElements, cProperties);
+    });
+    //show color palette
+    domElements.showColor.addEventListener("click", ev => {
+      doubleClickHandler(
+        CANVASPROPERTIES.colorClicked,
+        () => {
+          view.hideColorPicker(domElements, cProperties);
+        },
+        () => {
+          view.showColorPicker(domElements, cProperties);
+        }
       );
-      break;
+    });
+    domElements.canvasTools.addEventListener("click", ev => {
+      //color palette
+      view.handleToolbar(ev, domElements, cProperties);
+    });
+    //Make bigger pencil
+    document.addEventListener("wheel", ev => {
+      view.changeSize(ev, cProperties);
+    });
+    view.handleToolTip(domElements);
+
+    domElements.gridButton.addEventListener("click", ev => {
+      doubleClickHandler(
+        CANVASPROPERTIES.gridClicked,
+        () => {
+          view.clearGrid(CANVASPROPERTIES);
+        },
+        () => {
+          view.createGrid(DOMELEMENTS, CANVASPROPERTIES);
+        }
+      );
+    });
+
+    domElements.gridRowInput.addEventListener("change", ev => {
+      view.createGrid(DOMELEMENTS, CANVASPROPERTIES);
+    });
+
+    domElements.gridColInput.addEventListener("change", ev => {
+      view.createGrid(DOMELEMENTS, CANVASPROPERTIES);
+    });
+  };
+
+  let addColorPalette = (domElements, cProperties) => {
+    for (let i = 0; i < domElements.colors.length; i++) {
+      cProperties.colorsArr.push(domElements.colors[i].id);
     }
-  }
-  if (id === "eraser") {
-    eraser(canvasProperties);
-  } else if (id === "background") {
-    changeBackground(domElements, canvasProperties);
-  }
-
-  //todo add Zoom
-}
-
-function startDrawing(event, domElements, canvasProperties) {
-  hideColorPicker(domElements, canvasProperties);
-  //DRAW
-  if (!canvasProperties.erasing) {
-    canvasProperties.ctx.lineWidth = canvasProperties.strokeSize;
-    canvasProperties.cursorCtx.lineWidth = canvasProperties.strokeSize;
-
-    if (
-      canvasProperties.mouseDown === false &&
-      canvasProperties.moving === true
-    ) {
-      canvasProperties.ctx.beginPath();
-      canvasProperties.ctx.moveTo(event.x, event.y);
-
-      canvasProperties.mouseDown = true;
+  };
+  let doubleClickHandler = (clickBoolean, trueFunction, falseFunction) => {
+    if (clickBoolean === false) {
+      falseFunction();
+    } else if (clickBoolean === true) {
+      trueFunction();
     }
+  };
 
-    canvasProperties.ctx.beginPath();
-    canvasProperties.ctx.arc(
-      event.x,
-      event.y,
-      canvasProperties.strokeSize / 4,
-      0,
-      2 * Math.PI
-    );
-    canvasProperties.ctx.fill();
-    canvasProperties.ctx.stroke();
-    canvasProperties.moving = false;
-  } //ERASE
-  else if (canvasProperties.erasing) {
-    if (
-      canvasProperties.mouseDown === false &&
-      canvasProperties.moving === true
-    ) {
-      canvasProperties.mouseDown = true;
+  return {
+    init: () => {
+      view.setCanvasSize(DOMELEMENTS.canvasArr, CANVASPROPERTIES);
+      view.setColorIcon(DOMELEMENTS, CANVASPROPERTIES);
+
+      addColorPalette(DOMELEMENTS, CANVASPROPERTIES);
+      eventListeners(DOMELEMENTS, CANVASPROPERTIES);
     }
-    canvasProperties.ctx.clearRect(
-      event.x,
-      event.y,
-      canvasProperties.strokeSize * 2,
-      canvasProperties.strokeSize * 2
-    );
-  }
-}
-
-function stopDrawing(canvasProperties) {
-  canvasProperties.mouseDown = false;
-  canvasProperties.ctx.moveTo(0, 0);
-}
-
-function moveFunction(event, canvasProperties) {
-  canvasProperties.moving = true;
-
-  if (!canvasProperties.erasing) {
-    if (canvasProperties.mouseDown === true) {
-      canvasProperties.ctx.lineTo(event.x, event.y);
-      canvasProperties.ctx.stroke();
-    }
-  } else if (
-    canvasProperties.erasing === true &&
-    canvasProperties.mouseDown === true
-  ) {
-    canvasProperties.ctx.clearRect(
-      event.x,
-      event.y,
-      canvasProperties.strokeSize * 2,
-      canvasProperties.strokeSize * 2
-    );
-  }
-
-  movePointer(event, canvasProperties);
-}
-
-//move custom pointer
-function movePointer(event, canvasProperties) {
-  canvasProperties.cursorCtx.clearRect(
-    0,
-    0,
-    canvasProperties.width,
-    canvasProperties.height
-  );
-
-  canvasProperties.cursorCtx.beginPath();
-  canvasProperties.cursorCtx.arc(
-    event.x,
-    event.y,
-    canvasProperties.strokeSize,
-    0,
-    2 * Math.PI
-  );
-  canvasProperties.cursorCtx.stroke();
-  canvasProperties.cursorCtx.fill();
-}
-function removePointer(canvasProperties) {
-  canvasProperties.cursorCtx.clearRect(
-    0,
-    0,
-    canvasProperties.width,
-    canvasProperties.height
-  );
-}
-//pencil size
-function changeSize(event, canvasProperties) {
-  if (event.deltaY > 1 && canvasProperties.strokeSize >= 1) {
-    canvasProperties.strokeSize--;
-  } else if (event.deltaY <= 0 && canvasProperties.strokeSize < 10) {
-    canvasProperties.strokeSize++;
-  }
-  canvasProperties.ctx.lineWidth = canvasProperties.strokeSize;
-  canvasProperties.cursorCtx.lineWidth = canvasProperties.strokeSize;
-}
-//change color
-function changeColor(domElements, canvasProperties, color) {
-  canvasProperties.erasing = false;
-  canvasProperties.ctx.strokeStyle = color;
-  canvasProperties.ctx.fillStyle = color;
-  // canvasProperties.cursorCtx.strokeStyle = color;
-  canvasProperties.cursorCtx.fillStyle = color;
-  canvasProperties.cursorCtx.fill();
-  canvasProperties.cursorCtx.stroke();
-
-  canvasProperties.currentColor = color;
-  hideColorPicker(domElements);
-  setColorIcon(domElements, canvasProperties);
-}
-function changeBackground(domElements, canvasProperties) {
-  canvasProperties.ctx.clearRect(
-    0,
-    0,
-    canvasProperties.width,
-    canvasProperties.height
-  );
-  domElements.backgroundCanvas.style.backgroundColor =
-    canvasProperties.currentColor;
-}
-
-function eraser(canvasProperties) {
-  canvasProperties.cursorCtx.fillStyle = "white";
-  canvasProperties.cursorCtx.strokeStyle = "black";
-  canvasProperties.cursorCtx.fill();
-  canvasProperties.cursorCtx.stroke();
-  canvasProperties.currentColor = canvasProperties.colorPalette.white;
-  canvasProperties.erasing = true;
-}
-
-function reset(domElements, canvasProperties) {
-  canvasProperties.ctx.clearRect(
-    0,
-    0,
-    canvasProperties.width,
-    canvasProperties.height
-  );
-
-  canvasProperties.currentColor = canvasProperties.colorPalette.white;
-  changeBackground(domElements, canvasProperties);
-}
-function handleColorPalette(domElements, canvasProperties) {
-  if (canvasProperties.colorClicked === false) {
-    showColorPicker(domElements, canvasProperties);
-  } else if (canvasProperties.colorClicked === true) {
-    hideColorPicker(domElements, canvasProperties);
-  }
-}
-
-function showColorPicker(domElements, canvasProperties) {
-  domElements.colorPicker.classList.add("show");
-  domElements.colorPicker.classList.remove("hide");
-  canvasProperties.colorClicked = true;
-}
-function hideColorPicker(domElements, canvasProperties) {
-  domElements.colorPicker.classList.add("hide");
-  domElements.colorPicker.classList.remove("show");
-  canvasProperties.colorClicked = false;
-}
-function setColorIcon(domElements, canvasProperties) {
-  domElements.showColor.style.backgroundColor = canvasProperties.currentColor;
-}
-window.onload = function() {
-  init();
-};
+  };
+})(view);
+controller.init();

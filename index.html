@@ -6,27 +6,35 @@
   </head>
 
   <body>
-    <div class="container">
-      <canvas id="background-canvas"></canvas>
-      <canvas id="cursor-canvas"></canvas>
-      <canvas id="canvas"></canvas>
-    </div>
-
-    <span id="tooltip"></span>
-    <div id="canvas-tools">
-      <button id="reset">Reset</button>
-      <button id="background">Background</button>
-      <div id="color-picker" class="hide">
-        <span class="color-button" id="black"></span>
-        <span class="color-button" id="blue"></span>
-        <span class="color-button" id="red"></span>
-        <span class="color-button" id="green"></span>
-        <span class="color-button" id="yellow"></span>
-        <span class="color-button" id="purple"></span>
-        <span class="color-button" id="pink"></span>
+    <div class="main-container">
+      <div class="canvas-container">
+        <canvas id="background-canvas"></canvas>
+        <canvas id="grid-canvas"></canvas>
+        <canvas id="cursor-canvas"></canvas>
+        <canvas id="main-canvas"></canvas>
       </div>
-      <span class="button" id="show-color"></span>
-      <span class="button" id="eraser"></span>
+
+      <span id="tooltip"></span>
+
+      <div id="canvas-tools">
+        <button id="reset">Reset</button>
+        <button id="background">Background</button>
+        <input type="number" id="grid-rows" value="5" />
+        <input type="number" id="grid-cols" value="5" />
+        <button id="grid">Grid</button>
+        <div id="color-picker" class="hide">
+          <span class="color-button" id="black"></span>
+          <span class="color-button" id="blue"></span>
+          <span class="color-button" id="red"></span>
+          <span class="color-button" id="green"></span>
+          <span class="color-button" id="yellow"></span>
+          <span class="color-button" id="purple"></span>
+          <span class="color-button" id="pink"></span>
+        </div>
+        <span class="button" id="show-color" tabindex="-1"></span>
+        <span class="button" id="eraser" tabindex="-1"></span>
+      </div>
+      <!--<div id="canvas-tools-right"></div>-->
     </div>
 
     <script src="src/index.js"></script>
