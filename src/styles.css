@@ -1,0 +1,89 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+}
+.container {
+  position: relative;
+  width: 500px;
+  height: 500px;
+  margin: 10px;
+}
+#canvas-tools {
+  width: 500px;
+  height: 50px;
+  margin: 10px;
+  border: 5px solid black;
+}
+
+#canvas,
+#cursor-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 5px solid black;
+}
+
+#canvas:hover {
+  cursor: none;
+}
+.lower-opacity {
+  opacity: 0.5;
+}
+.color-button,
+.button {
+  position: relative;
+
+  margin: 5px 2px;
+  display: inline-block;
+  height: 20px;
+  width: 20px;
+  border: 2px solid black;
+}
+.color-button {
+  float: right;
+}
+.color-button:hover,
+.button:hover {
+  cursor: pointer;
+}
+
+#blue {
+  background-color: rgb(50, 67, 255);
+}
+#red {
+  background-color: rgb(255, 33, 17);
+}
+#yellow {
+  background-color: rgb(255, 251, 17);
+}
+#black {
+  background-color: black;
+}
+#green {
+  background-color: rgb(9, 224, 9);
+}
+#purple {
+  background-color: purple;
+}
+#pink {
+  background-color: pink;
+}
+
+#tooltip {
+  position: absolute;
+
+  padding: 10px;
+  border-radius: 10px;
+  opacity: 0;
+  background-color: black;
+
+  color: white;
+}
+
+.visible {
+  opacity: 0.7;
+}
